@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS `product` (
+    `id` VARBINARY(36) NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `price` DECIMAL(15,5) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB, DEFAULT CHARSET=utf8mb4;
