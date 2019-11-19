@@ -10,8 +10,6 @@ import (
 func New() http.Handler {
 	router := httprouter.New()
 
-	router.GET("/api/hello", handle.Hello)
-
 	router.GET("/api/product/:id", handle.GetProduct)
 	router.POST("/api/product", handle.CreateProduct)
 	router.PUT("/api/product/:id", handle.UpdateProduct)
