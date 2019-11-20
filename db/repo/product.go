@@ -49,7 +49,7 @@ func GetProductByID(id string) (*types.Product, error) {
 	err := db.Client().Get(&product, getProduct, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, types.NewMissingEntityError(id)
 		}
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func UpdateProduct(id string, product types.Product) (*types.Product, error) {
 	}
 
 	if rowsAff == 0 {
-		return nil, nil
+		return nil, types.NewMissingEntityError(id)
 	}
 
 	return &product, nil

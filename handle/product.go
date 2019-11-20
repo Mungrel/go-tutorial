@@ -14,18 +14,10 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 
 	product, err := repo.GetProductByID(id)
 	if err != nil {
-		// TODO: Respond with 500.
 		respondWithError(w, err)
 		return
 	}
 
-	if product == nil {
-		// TODO: Respond with 404.
-		respondWithStatus(w, http.StatusNotFound)
-		return
-	}
-
-	// TODO: Respond with JSON & 200.
 	respondWithJSON(w, product, http.StatusOK)
 }
 
@@ -61,11 +53,6 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	updatedProduct, err := repo.UpdateProduct(id, product)
 	if err != nil {
 		respondWithError(w, err)
-		return
-	}
-
-	if updatedProduct == nil {
-		respondWithStatus(w, http.StatusNotFound)
 		return
 	}
 

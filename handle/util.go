@@ -3,6 +3,7 @@ package handle
 import (
 	"encoding/json"
 	"log"
+	"meme/types"
 	"net/http"
 )
 
@@ -16,10 +17,18 @@ func respondWithStatus(w http.ResponseWriter, status int) {
 
 func respondWithError(w http.ResponseWriter, err error) {
 	log.Println(err)
-	response := map[string]string{
-		"error": err.Error(),
+
+	status := http.StatusInternalServerError
+	message := "an internal error occurred"
+	if se, ok := err.(types.StatusError); ok {
+		status = se.Status
+		message = se.Message
 	}
-	respondWithJSON(w, response, http.StatusInternalServerError)
+
+	response := map[string]string{
+		"error": message,
+	}
+	respondWithJSON(w, response, status)
 }
 
 func respondWithJSON(w http.ResponseWriter, value interface{}, status int) {
