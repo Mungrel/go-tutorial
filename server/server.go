@@ -1,6 +1,7 @@
 package server
 
 import (
+	"meme/db"
 	"meme/handle"
 	"net/http"
 
@@ -16,5 +17,17 @@ func New() http.Handler {
 	router.DELETE("/api/product/:id", handle.DeleteProduct)
 	router.GET("/api/products", handle.ListProducts)
 
-	return router
+	return &Server{
+		router: router,
+	}
+}
+
+type Server struct {
+	router http.Handler
+}
+
+func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	ctx = db.ContextWithDB(ctx, db.Client())
+	server.router.ServeHTTP(w, r.WithContext(ctx))
 }
