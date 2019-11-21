@@ -12,20 +12,12 @@ import (
 func GetProduct(w http.ResponseWriter, r *http.Request) {
 	id := httprouter.GetParam(r, "id")
 
-	product, err := repo.GetProductByID(id)
+	product, err := repo.GetProductByID(r.Context(), id)
 	if err != nil {
-		// TODO: Respond with 500.
 		respondWithError(w, err)
 		return
 	}
 
-	if product == nil {
-		// TODO: Respond with 404.
-		respondWithStatus(w, http.StatusNotFound)
-		return
-	}
-
-	// TODO: Respond with JSON & 200.
 	respondWithJSON(w, product, http.StatusOK)
 }
 
@@ -38,7 +30,7 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	savedProduct, err := repo.CreateProduct(product)
+	savedProduct, err := repo.CreateProduct(r.Context(), product)
 	if err != nil {
 		respondWithError(w, err)
 		return
@@ -58,14 +50,9 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 	id := httprouter.GetParam(r, "id")
 
-	updatedProduct, err := repo.UpdateProduct(id, product)
+	updatedProduct, err := repo.UpdateProduct(r.Context(), id, product)
 	if err != nil {
 		respondWithError(w, err)
-		return
-	}
-
-	if updatedProduct == nil {
-		respondWithStatus(w, http.StatusNotFound)
 		return
 	}
 
@@ -76,7 +63,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	id := httprouter.GetParam(r, "id")
 
-	err := repo.DeleteProduct(id)
+	err := repo.DeleteProduct(r.Context(), id)
 	if err != nil {
 		respondWithError(w, err)
 		return
@@ -87,7 +74,7 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 
 // ListProducts handles product list GET requests.
 func ListProducts(w http.ResponseWriter, r *http.Request) {
-	products, err := repo.ListProducts()
+	products, err := repo.ListProducts(r.Context())
 	if err != nil {
 		respondWithError(w, err)
 		return

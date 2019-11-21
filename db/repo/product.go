@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"context"
 	"database/sql"
 	"meme/db"
 	"meme/types"
@@ -10,7 +11,7 @@ import (
 
 // CreateProduct creates a product in the DB.
 // It will generate the ID itself.
-func CreateProduct(product types.Product) (types.Product, error) {
+func CreateProduct(ctx context.Context, product types.Product) (types.Product, error) {
 	id, err := uuid.NewV4()
 	if err != nil {
 		return types.Product{}, err
@@ -29,7 +30,7 @@ func CreateProduct(product types.Product) (types.Product, error) {
 			:price
 		)`
 
-	_, err = db.Client().NamedExec(insertProduct, product)
+	_, err = db.ContextDB(ctx).NamedExec(insertProduct, product)
 	if err != nil {
 		return types.Product{}, err
 	}
@@ -39,17 +40,17 @@ func CreateProduct(product types.Product) (types.Product, error) {
 
 // GetProductByID returns the product associated with the provided ID.
 // It will return nil (and no error) if no product was found.
-func GetProductByID(id string) (*types.Product, error) {
+func GetProductByID(ctx context.Context, id string) (*types.Product, error) {
 	const getProduct = `
 		SELECT id, name, price
 		FROM product
 		WHERE id = ?`
 
 	var product types.Product
-	err := db.Client().Get(&product, getProduct, id)
+	err := db.ContextDB(ctx).Get(&product, getProduct, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, types.NewMissingEntityError(id)
 		}
 		return nil, err
 	}
@@ -59,7 +60,7 @@ func GetProductByID(id string) (*types.Product, error) {
 
 // UpdateProduct updates the product associated with the provided ID with the provided product value.
 // It will return nil if there was no product for that ID.
-func UpdateProduct(id string, product types.Product) (*types.Product, error) {
+func UpdateProduct(ctx context.Context, id string, product types.Product) (*types.Product, error) {
 	const updateProduct = `
 		UPDATE product SET
 			name = :name,
@@ -68,7 +69,7 @@ func UpdateProduct(id string, product types.Product) (*types.Product, error) {
 
 	product.ID = id
 
-	result, err := db.Client().NamedExec(updateProduct, product)
+	result, err := db.ContextDB(ctx).NamedExec(updateProduct, product)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +80,7 @@ func UpdateProduct(id string, product types.Product) (*types.Product, error) {
 	}
 
 	if rowsAff == 0 {
-		return nil, nil
+		return nil, types.NewMissingEntityError(id)
 	}
 
 	return &product, nil
@@ -87,24 +88,24 @@ func UpdateProduct(id string, product types.Product) (*types.Product, error) {
 
 // DeleteProduct deletes the product associated with the provided ID.
 // It will *not* return an error if no product was found for that ID.
-func DeleteProduct(id string) error {
+func DeleteProduct(ctx context.Context, id string) error {
 	const delete = `
 		DELETE
 		FROM product
 		WHERE id = ?`
 
-	_, err := db.Client().Exec(delete, id)
+	_, err := db.ContextDB(ctx).Exec(delete, id)
 	return err
 }
 
 // ListProducts lists the first 10 products in the DB.
-func ListProducts() ([]types.Product, error) {
+func ListProducts(ctx context.Context) ([]types.Product, error) {
 	const list = `
 		SELECT id, name, price
 		FROM product
 		LIMIT 10`
 
 	products := []types.Product{}
-	err := db.Client().Select(&products, list)
+	err := db.ContextDB(ctx).Select(&products, list)
 	return products, err
 }
