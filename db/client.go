@@ -43,15 +43,16 @@ func Client() *sqlx.DB {
 	return dbClient
 }
 
+var TablesDir = "./db/tables/"
+
 func initTables(client *sqlx.DB) error {
-	const tablesDir = "./db/tables/"
-	files, err := ioutil.ReadDir(tablesDir)
+	files, err := ioutil.ReadDir(TablesDir)
 	if err != nil {
 		return err
 	}
 
 	for _, file := range files {
-		contents, err := ioutil.ReadFile(tablesDir + file.Name())
+		contents, err := ioutil.ReadFile(TablesDir + file.Name())
 		if err != nil {
 			return err
 		}
